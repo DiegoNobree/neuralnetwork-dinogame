@@ -1,7 +1,7 @@
 package game.factory;
 
 import game.model.Dino;
-import neuroevolution.neuralnetwork.NeuralNetwork;
+import neuralnetworking.NeuralNetwork;
 
 public class DinoFactory {
 

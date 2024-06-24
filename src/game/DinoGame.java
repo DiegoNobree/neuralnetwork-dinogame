@@ -11,11 +11,9 @@ import game.model.CactusObstacle.CactusType;
 import game.model.Dino;
 import game.model.Obstacle;
 import game.model.Obstacle.ObstacleType;
-import neuroevolution.genetic.GeneticAlgorithm;
-import neuroevolution.genetic.Genotype;
-import neuroevolution.neuralnetwork.Layer;
-import neuroevolution.neuralnetwork.NeuralNetwork;
-import neuroevolution.neuralnetwork.Neuron;
+import genetic.GeneticAlgorithm;
+import genetic.Genotype;
+import neuralnetworking.NeuralNetwork;
 import processing.core.PApplet;
 import processing.core.PImage;
 import util.Screen;
@@ -28,7 +26,6 @@ public class DinoGame extends PApplet {
 	int groundLevel;
 	int tickCount = 0;
 	int spawnRate = 140;
-	int minSpawnRate = 80;
 	int speedupRate = 1000;
 	
 	int score = 0;
@@ -51,11 +48,11 @@ public class DinoGame extends PApplet {
 	public void settings() {
 		size(1366, 768);
 		Screen.setDimensions(width, height);
-		this.groundLevel = height - 100;
-		this.obstacles = new LinkedList<Obstacle>();
-		DinoFactory.init(100, this.groundLevel);
-		ObstacleFactory.init(0.3f, width, this.groundLevel);
-		this.agent = new GeneticAlgorithm();
+		groundLevel = height - 100;
+		obstacles = new LinkedList<Obstacle>();
+		DinoFactory.init(100, groundLevel);
+		ObstacleFactory.init(0.3f, width, groundLevel);
+		agent = new GeneticAlgorithm();
 	}
 	
 	@Override
@@ -77,32 +74,32 @@ public class DinoGame extends PApplet {
 	@Override
 	public void draw() {
 		for (int i = 0; i < speed; i++) {
-			this.tickCount++;
-			this.clearScreen();
-			this.drawGenerationInfo();
-			this.renderGround();
-			this.obstacles.forEach(obstacle -> this.renderObstacle(obstacle));
-			this.agent.population.genomes.forEach(genome -> this.renderDino(genome.dino));
-			this.renderNeuralNetwork(this.agent.getBestGenome().cactusNet, 850);
-			this.renderNeuralNetwork(this.agent.getBestGenome().birdNet, 1100);
-			this.obstacles.removeIf(obstacle -> obstacle.isInvisible());
-			for (Genotype genome: this.agent.population.genomes) {
-				for (Obstacle obstacle: this.obstacles) {
-					this.checkCollision(obstacle, genome.dino);
+			tickCount++;
+			clearScreen();
+			drawGenerationInfo();
+			renderGround();
+			obstacles.forEach(obstacle -> renderObstacle(obstacle));
+			agent.population.genomes.forEach(genome -> renderDino(genome.dino));
+			renderNeuralNetwork(agent.getBestGenome().cactusNet, 850);
+			renderNeuralNetwork(agent.getBestGenome().birdNet, 1100);
+			obstacles.removeIf(obstacle -> obstacle.isInvisible());
+			for (Genotype genome: agent.population.genomes) {
+				for (Obstacle obstacle: obstacles) {
+					checkCollision(obstacle, genome.dino);
 				}
 			}
 			if (tickCount % spawnRate == 0) {
-				this.spawnObstacle();
+				spawnObstacle();
 			}
 			
 			if (tickCount % speedupRate == 0) {
 				Obstacle.speedUp();
 			}
 			
-			this.obstacles.forEach(obstacle -> obstacle.update());
-			this.agent.updatePopulation(obstacles);
-			if (this.agent.populationDead()) {
-				this.reset();
+			obstacles.forEach(obstacle -> obstacle.update());
+			agent.updatePopulation(obstacles);
+			if (agent.populationDead()) {
+				reset();
 			}
 		}
 	}
@@ -122,20 +119,20 @@ public class DinoGame extends PApplet {
 		tickCount = 0;
 		agent.evolvePopulation();
 		score = 0;
-		this.spawnRate = 140;
+		spawnRate = 140;
 	}
 	
 	private void checkCollision(Obstacle obstacle, Dino dino) {
 		if (!dino.isDead) {
 			if (obstacle.checkDinoCollision(dino)) {
 				dino.isDead = true;
-				this.agent.alive--;
+				agent.alive--;
 			}
 		}
 	}
 	
 	private void spawnObstacle() {
-		this.obstacles.add(ObstacleFactory.getObstacle());
+		obstacles.add(ObstacleFactory.getObstacle());
 	}
 	
 	private void renderDino(Dino dino) {
@@ -148,7 +145,7 @@ public class DinoGame extends PApplet {
 			} else {
 				if (dino.isDucking) {
 					image(dinoDuckImage, dino.x, dino.y-dino.height, dino.width, dino.height);
-				} else if (dino.y < this.groundLevel) {
+				} else if (dino.y < groundLevel) {
 					image(dinoJumpImage, dino.x, dino.y-dino.height, dino.width, dino.height);
 				} else if (dino.state == 0) {
 					image(dinoRun1Image, dino.x, dino.y-dino.height, dino.width, dino.height);
@@ -161,9 +158,9 @@ public class DinoGame extends PApplet {
 	
 	private void renderObstacle(Obstacle obstacle) {
 		if (obstacle.type == ObstacleType.BIRD) {
-			this.renderObstacle((BirdObstacle) obstacle);
+			renderObstacle((BirdObstacle) obstacle);
 		} else {
-			this.renderObstacle((CactusObstacle) obstacle);
+			renderObstacle((CactusObstacle) obstacle);
 		}
 	}
 	
@@ -186,7 +183,7 @@ public class DinoGame extends PApplet {
 	}
 	
 	private void drawGenerationInfo() {
-		score = this.agent.getBestScore();
+		score = agent.getBestScore();
 		highscore = Math.max(score, highscore);
 		textSize(22);
 		fill(0);
@@ -194,54 +191,15 @@ public class DinoGame extends PApplet {
 		text("Generation: " + agent.generation, 20, 80);
 		text("Alive: " + agent.alive + " / " + agent.populationSize, 20, 110);
 		text("Highscore: " + highscore, 20, 140);
-		text("Speed: " + speed + "x", 20, 170);
+
 	}
 	
 	private void renderNeuralNetwork(NeuralNetwork net, float beginx) {
-		int beginy = 0;
-		int yspan = 300;
-		int layerSpace = 80;
-		int neuronSpace = 10;
-		int layerWidth = 15;
-		ellipseMode(CENTER);
-		for (int i = 1; i < net.layers.size(); i++) {
-			Layer prevLayer = net.layers.get(i-1);
-			Layer layer = net.layers.get(i);
-			int totalLayerHeight = layer.neurons.size()*layerWidth + (layer.neurons.size()-1)*neuronSpace;
-			int layerBegin = beginy + (yspan - totalLayerHeight)/2;
-			int totalPrevLayerHeight = prevLayer.neurons.size()*layerWidth + (prevLayer.neurons.size()-1)*neuronSpace;
-			int prevLayerBegin = beginy + (yspan - totalPrevLayerHeight)/2;
-			// Draw current layer
-			for (int j = 0; j < layer.neurons.size(); j++) {
-				// Draw weights for each neuron
-				Neuron neuron = layer.neurons.get(j);
-				for (int k = 0; k < neuron.weights.size(); k++) {
-					float weight = neuron.weights.get(k);
-					strokeWeight(2*Math.abs(weight));
-					if (weight >= 0) {
-						stroke(0, 0, 255);
-					} else {
-						stroke(255, 0, 0);
-					}
-					line(beginx + (i-1)*(layerWidth+layerSpace), prevLayerBegin + k*(layerWidth + neuronSpace), beginx + i*(layerWidth+layerSpace), layerBegin + j*(neuronSpace + layerWidth));
-				}
-				fill(255);
-				strokeWeight(1);
-				stroke(0);
-				ellipse(beginx + i*(layerWidth+layerSpace), layerBegin + j*(neuronSpace + layerWidth), layerWidth, layerWidth);
-			}
-			// Draw previous layer
-			for (int j = 0; j < prevLayer.neurons.size(); j++) {
-				fill(255);
-				strokeWeight(1);
-				stroke(0);
-				ellipse(beginx + (i-1)*(layerWidth+layerSpace), prevLayerBegin + j*(neuronSpace + layerWidth), layerWidth, layerWidth);
-			}
-		}
+
 	}
 	
 	private void renderGround() {
-		image(groundImage, 0, this.groundLevel-10, width, 20);
+		image(groundImage, 0, groundLevel-10, width, 20);
 	}
 	
 	private void clearScreen() {

@@ -1,5 +1,5 @@
 
-package neuroevolution.neuralnetwork;
+package neuralnetworking;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,25 +15,25 @@ public class Layer {
 	public Layer(int neuronCount, int numInputs) {
 		this();
 		for (int i = 0; i < neuronCount; i++) {
-			this.neurons.add(new Neuron(numInputs));
+			neurons.add(new Neuron(numInputs));
 		}
 	}
 	
 	public void eval(Layer prevLayer) {
-		for (Neuron neuron: this.neurons) {
+		for (Neuron neuron: neurons) {
 			float weightedSum = 0.0f;
 			for (int i = 0; i < prevLayer.neurons.size(); i++) {
 				Neuron prevNeuron = prevLayer.neurons.get(i);
 				weightedSum += prevNeuron.value * neuron.weights.get(i);
 			}
-			neuron.value = this.activate(weightedSum);
+			neuron.value = activate(weightedSum);
 		}
 	}
 	
 	public float[] getOutput() {
-		float[] output = new float[this.neurons.size()];
-		for (int i = 0; i < this.neurons.size(); i++) {
-			output[i] = this.neurons.get(i).value;
+		float[] output = new float[neurons.size()];
+		for (int i = 0; i < neurons.size(); i++) {
+			output[i] = neurons.get(i).value;
 		}
 		return output;
 	}

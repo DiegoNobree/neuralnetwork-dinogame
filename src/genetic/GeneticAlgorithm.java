@@ -1,5 +1,5 @@
 
-package neuroevolution.genetic;
+package genetic;
 
 import java.util.List;
 
@@ -23,7 +23,7 @@ public class GeneticAlgorithm {
 	public int alive;
 	public int generation;
 	
-	public int populationSize = 100;
+	public int populationSize = 1000;
 	public float elitism = 0.2f;
 	public float mutationRate = 0.1f;
 	public float mutationStdDev = 0.5f;
@@ -33,15 +33,15 @@ public class GeneticAlgorithm {
 	private Dino bestGenome;
 	
 	public GeneticAlgorithm() {
-		this.population = new Population(this.populationSize);
-		this.bestGenome = this.population.genomes.get(0).dino;
-		this.alive = this.populationSize;
-		this.generation = 1;
+		population = new Population(populationSize);
+		bestGenome = population.genomes.get(0).dino;
+		alive = populationSize;
+		generation = 1;
 	}
 	
 	public void updatePopulation(List<Obstacle> obstacles) {
-		ObstacleInfo data = this.getClosestObstacle(obstacles);
-		for (Genotype genome: this.population.genomes) {
+		ObstacleInfo data = getClosestObstacle(obstacles);
+		for (Genotype genome: population.genomes) {
 			if (!genome.dino.isDead) {
 				genome.dino.feed(data.closestObstacle, data.distance);
 				genome.dino.update();
@@ -50,19 +50,19 @@ public class GeneticAlgorithm {
 	}
 	
 	public void evolvePopulation() {
-		this.alive = this.populationSize;
-		this.generation++;
-		this.population.evolve(this.elitism, this.randomness, this.mutationRate, this.mutationStdDev, this.childCount);
-		this.bestGenome = this.population.genomes.get(0).dino;
+		alive = populationSize;
+		generation++;
+		population.evolve(elitism, randomness, mutationRate, mutationStdDev, childCount);
+		bestGenome = population.genomes.get(0).dino;
 	}
 	
 	public Dino getBestGenome() {
-		return this.bestGenome;
+		return bestGenome;
 	}
 	
 	public int getBestScore() {
 		int best = 0;
-		for (Genotype genome: this.population.genomes) {
+		for (Genotype genome: population.genomes) {
 			if (genome.dino.score > best) {
 				best = genome.dino.score;
 			}
@@ -71,7 +71,7 @@ public class GeneticAlgorithm {
 	}
 	
 	public boolean populationDead() {
-		for (Genotype genome: this.population.genomes) {
+		for (Genotype genome: population.genomes) {
 			if (!genome.dino.isDead) {
 				return false;
 			}

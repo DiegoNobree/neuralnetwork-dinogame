@@ -1,6 +1,6 @@
 package game.model;
 
-import neuroevolution.neuralnetwork.NeuralNetwork;
+import neuralnetworking.NeuralNetwork;
 import util.Screen;
 
 public class Dino {

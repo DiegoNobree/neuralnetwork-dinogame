@@ -1,5 +1,5 @@
 
-package neuroevolution.neuralnetwork;
+package neuralnetworking;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -70,7 +70,6 @@ public class NeuralNetwork {
 			this.layers.get(i).eval(prevLayer);
 			prevLayer = this.layers.get(i);
 		}
-		// prev layer is now the last layer in the network
 		return prevLayer.getOutput();
 	}
 	

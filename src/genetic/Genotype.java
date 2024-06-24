@@ -1,12 +1,12 @@
 
-package neuroevolution.genetic;
+package genetic;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import game.factory.DinoFactory;
 import game.model.Dino;
-import neuroevolution.neuralnetwork.NeuralNetwork;
+import neuralnetworking.NeuralNetwork;
 
 public class Genotype {
 
