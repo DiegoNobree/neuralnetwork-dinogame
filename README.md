@@ -1,8 +1,8 @@
 # neuroevolution-dino
-Using artificial neural networks and genetic algorithm to train bot to play Chrome Dino game.
+Usando redes neurais artificiais e algoritmo genético para treinar bot para jogar o jogo Chrome Dino.
 
 
-## Neural network architecture
+## Arquitetura da Rede Neural
 
 Cada dinossauro na população possui 2 redes neurais:
 
